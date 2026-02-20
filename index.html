@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Portal</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --text-color: #ffffff;
+            --accent-color: #3b82f6;
+            --input-bg: #1e1e1e;
+            --border-color: #333333;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 30px;
+            letter-spacing: -1px;
+            font-weight: 600;
+        }
+
+        .search-box {
+            display: flex;
+            width: 100%;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 5px 5px 5px 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .search-box:focus-within {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+        }
+
+        input {
+            flex-grow: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-color);
+            font-size: 1.1rem;
+            outline: none;
+        }
+
+        input::placeholder {
+            color: #888;
+        }
+
+        button {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 10px 24px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #2563eb;
+        }
+
+        .footer {
+            margin-top: 40px;
+            font-size: 0.85rem;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Web Portal</h1>
+        
+        <form id="proxy-form">
+            <div class="search-box">
+                <input type="text" id="url-input" placeholder="Search the web or enter URL (e.g., allsonicgames.net)" required autocomplete="off">
+                <button type="submit">Browse</button>
+            </div>
+        </form>
+
+        <div class="footer">
+            Runs via secure Cloudflare Edge routing.
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('proxy-form').addEventListener('submit', function(e) {
+            e.preventDefault(); // Prevent the page from refreshing
+            
+            let url = document.getElementById('url-input').value.trim();
+            
+            // Auto-detect if it's a search term or a URL
+            if (!url.includes('.') || url.includes(' ')) {
+                // If it looks like a search query, route it to DuckDuckGo
+                url = 'https://duckduckgo.com/?q=' + encodeURIComponent(url);
+            } else if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                // If they forgot https://, add it for them
+                url = 'https://' + url;
+            }
+
+            // Encode the URL so special characters don't break the routing
+            const encodedUrl = btoa(url);
+
+            // ==========================================
+            // PUT YOUR CLOUDFLARE WORKER URL HERE
+            // Example: 'https://my-proxy.my-name.workers.dev'
+            // ==========================================
+            const WORKER_URL = 'https://YOUR-WORKER-NAME.YOUR-SUBDOMAIN.workers.dev'; 
+
+            // Redirect the browser through the proxy
+            window.location.href = `${WORKER_URL}/?url=${encodedUrl}`;
+        });
+    </script>
+</body>
+</html>
